@@ -54,21 +54,18 @@ public class VoxelInkCommand extends VoxelCommand {
         }
 
         // Command: /vi [material]      <- Sets the defined material as voxel substance.
-        if (args.length >= 1) {
-            try {
-                BlockData newData = snipeData.getVoxelMaterial().createBlockData("[" + String.join(",", args) + "]");
-                BlockData activeData = snipeData.getVoxelSubstance();
+        try {
+            BlockData newData = snipeData.getVoxelMaterial().createBlockData("[" + String.join(",", args) + "]");
+            BlockData activeData = snipeData.getVoxelSubstance();
 
-                snipeData.setVoxelSubstance(activeData.merge(newData));
-                snipeData.getVoxelMessage().data();
-            } catch (IllegalArgumentException e) {
-                player.sendMessage(ChatColor.RED + "The data value(s) cannot be imitated to the active voxel material.");
-            }
-
-            return true;
+            snipeData.setVoxelSubstance(activeData.merge(newData));
+            snipeData.getVoxelMessage().data();
+        } catch (IllegalArgumentException e) {
+            player.sendMessage(ChatColor.RED + "The data value(s) cannot be imitated to the active voxel material.");
         }
 
-        return false;
+        return true;
+
     }
 
     @Override

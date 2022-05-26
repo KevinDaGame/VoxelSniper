@@ -26,7 +26,7 @@ public class VoxelReplaceCommand extends VoxelCommand {
 
     @Override
     public List<String> registerTabCompletion() {
-        return Arrays.stream(Material.values()).filter(e -> e.isBlock()).map(e -> e.getKey().toString()).collect(Collectors.toList());
+        return Arrays.stream(Material.values()).filter(Material::isBlock).map(e -> e.getKey().toString()).collect(Collectors.toList());
     }
 
     @Override
@@ -67,11 +67,10 @@ public class VoxelReplaceCommand extends VoxelCommand {
         if (material != null && material.isBlock()) {
             snipeData.setReplaceSubstance(material.createBlockData());
             snipeData.getVoxelMessage().replace();
-            return true;
         } else {
             player.sendMessage(ChatColor.RED + "You have entered an invalid Item ID.");
-            return true;
         }
+        return true;
     }
 
     @Override
@@ -81,7 +80,7 @@ public class VoxelReplaceCommand extends VoxelCommand {
             args[0] = args[0].toLowerCase();
 
             if (!args[0].startsWith("minecraft:")) {
-                if (args[0].startsWith("mi") && !args[0].equals("minecraft:")) {
+                if (args[0].startsWith("mi")) {
                     return Lists.newArrayList("minecraft:");
                 }
 

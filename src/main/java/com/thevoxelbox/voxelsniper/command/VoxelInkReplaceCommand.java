@@ -54,20 +54,17 @@ public class VoxelInkReplaceCommand extends VoxelCommand {
         }
 
         // Command: /vir [data]
-        if (args.length >= 1) {
-            try {
-                BlockData newData = snipeData.getReplaceMaterial().createBlockData("[" + String.join(",", args) + "]");
-                BlockData activeData = snipeData.getReplaceSubstance();
+        try {
+            BlockData newData = snipeData.getReplaceMaterial().createBlockData("[" + String.join(",", args) + "]");
+            BlockData activeData = snipeData.getReplaceSubstance();
 
-                snipeData.setReplaceSubstance(activeData.merge(newData));
-                snipeData.getVoxelMessage().replaceData();
-            } catch (IllegalArgumentException e) {
-                player.sendMessage(ChatColor.RED + "The data value(s) cannot be imitated to the active voxel material.");
-            }
-            return true;
+            snipeData.setReplaceSubstance(activeData.merge(newData));
+            snipeData.getVoxelMessage().replaceData();
+        } catch (IllegalArgumentException e) {
+            player.sendMessage(ChatColor.RED + "The data value(s) cannot be imitated to the active voxel material.");
         }
+        return true;
 
-        return false;
     }
 
     @Override

@@ -81,7 +81,7 @@ public class VoxelVoxelCommand extends VoxelCommand {
             args[0] = args[0].toLowerCase();
 
             if (!args[0].startsWith("minecraft:")) {
-                if (args[0].startsWith("mi") && !args[0].equals("minecraft:")) {
+                if (args[0].startsWith("mi")) {
                     return Lists.newArrayList("minecraft:");
                 }
 

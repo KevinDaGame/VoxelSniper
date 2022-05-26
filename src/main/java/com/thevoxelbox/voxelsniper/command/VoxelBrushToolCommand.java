@@ -51,9 +51,9 @@ public class VoxelBrushToolCommand extends VoxelCommand {
                     return false;
                 }
 
-                Material itemInHand = (player.getInventory().getItemInMainHand() != null) ? player.getInventory().getItemInMainHand().getType() : null;
+                Material itemInHand = player.getInventory().getItemInMainHand().getType();
 
-                if (itemInHand == null) {
+                if (itemInHand.isAir()) {
                     player.sendMessage(ChatColor.RED + "Please hold an item to assign a tool action to.");
                     return true;
                 }
@@ -80,13 +80,12 @@ public class VoxelBrushToolCommand extends VoxelCommand {
         
         // Command: /btool remove
         if (args[0].equalsIgnoreCase("remove")) {
-            Material itemInHand = (player.getInventory().getItemInMainHand() != null) ? player.getInventory().getItemInMainHand().getType() : null;
+            Material itemInHand = player.getInventory().getItemInMainHand().getType();
 
-            if (itemInHand == null) {
+            if (itemInHand.isAir()) {
                 player.sendMessage(ChatColor.RED + "Please hold an item to unassign a tool action.");
                 return true;
             }
-
             if (sniper.getCurrentToolId() == null) {
                 player.sendMessage(ChatColor.RED + "You are not allowed to unassign the default tool!");
                 return true;

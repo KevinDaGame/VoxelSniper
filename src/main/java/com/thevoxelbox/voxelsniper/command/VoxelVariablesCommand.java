@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- *
  * @author ervinnnc
  */
 public class VoxelVariablesCommand extends VoxelCommand {
@@ -27,7 +26,7 @@ public class VoxelVariablesCommand extends VoxelCommand {
 
     @Override
     public List<String> registerTabCompletion() {
-        return Arrays.stream(Material.values()).filter(e -> e.isBlock()).map(e -> e.getKey().toString()).collect(Collectors.toList());
+        return Arrays.stream(Material.values()).filter(Material::isBlock).map(e -> e.getKey().toString()).collect(Collectors.toList());
     }
 
     @Override
@@ -39,33 +38,31 @@ public class VoxelVariablesCommand extends VoxelCommand {
             try {
                 snipeData.setcCen(Integer.parseInt(args[0]));
                 snipeData.getVoxelMessage().center();
-                return true;
             } catch (NumberFormatException exception) {
                 player.sendMessage(ChatColor.GOLD + "/" + getActiveAlias() + " <number>");
                 player.sendMessage(ChatColor.YELLOW + "    Changes the voxel center parameter of the brush to the specified number.");
-                return true;
             }
+            return true;
         }
 
         if (getActiveAlias().equalsIgnoreCase("vh")) {
             try {
                 snipeData.setVoxelHeight(Integer.parseInt(args[0]));
                 snipeData.getVoxelMessage().height();
-                return true;
             } catch (NumberFormatException exception) {
                 player.sendMessage(ChatColor.GOLD + "/" + getActiveAlias() + " height <number>");
                 player.sendMessage(ChatColor.YELLOW + "    Changes the voxel height parameter of the brush to the specified number.");
-                return false;
             }
+                return false;
         }
 
         if (getActiveAlias().equalsIgnoreCase("vl")) {
-            if (args.length == 0 && args[0].equalsIgnoreCase("clear")) {
+            if (args.length == 1 && args[0].equalsIgnoreCase("clear")) {
                 snipeData.getVoxelList().clear();
                 snipeData.getVoxelMessage().voxelList();
                 return true;
             }
-            
+
             if (args.length == 0 || (args.length == 1 && (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("help")))) {
                 player.sendMessage(ChatColor.DARK_AQUA + "Using Voxel List:");
                 player.sendMessage(ChatColor.GOLD + "/" + getActiveAlias() + " clear");
@@ -200,7 +197,7 @@ public class VoxelVariablesCommand extends VoxelCommand {
             args[0] = args[0].toLowerCase().replace("-", "");
 
             if (!args[0].startsWith("minecraft:")) {
-                if (args[0].startsWith("mi") && !args[0].equals("minecraft:")) {
+                if (args[0].startsWith("mi")) {
                     return Lists.newArrayList("minecraft:");
                 }
 
@@ -216,7 +213,7 @@ public class VoxelVariablesCommand extends VoxelCommand {
             }
 
             if (args[0].equalsIgnoreCase("center") || args[0].equals("height")) {
-                if (args.length == 1) {
+                if (args.length == 2) {
                     return Lists.newArrayList("[number]");
                 }
             }
@@ -226,7 +223,7 @@ public class VoxelVariablesCommand extends VoxelCommand {
                 args[0] = args[0].toLowerCase().replace("-", "");
 
                 if (!args[0].startsWith("minecraft:")) {
-                    if (args[0].startsWith("mi") && !args[0].equals("minecraft:")) {
+                    if (args[0].startsWith("mi")) {
                         return Lists.newArrayList("minecraft:");
                     }
 

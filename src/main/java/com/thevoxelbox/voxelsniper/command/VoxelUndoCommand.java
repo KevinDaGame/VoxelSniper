@@ -4,6 +4,7 @@ import com.thevoxelbox.voxelsniper.VoxelProfileManager;
 import com.thevoxelbox.voxelsniper.snipe.Sniper;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -99,7 +100,7 @@ public class VoxelUndoCommand extends VoxelCommand {
         }
 
         if (args.length == 1) {
-            Bukkit.getOnlinePlayers().stream().map(e -> e.getName()).forEach(suggestions::add);
+            Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).forEach(suggestions::add);
         }
 
         return suggestions;
