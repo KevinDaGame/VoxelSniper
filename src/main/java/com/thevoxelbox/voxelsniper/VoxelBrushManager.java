@@ -96,7 +96,7 @@ public class VoxelBrushManager {
         brushManager.registerSniperBrush(SplatterVoxelBrush.class, "sv", "splattervoxel");
         brushManager.registerSniperBrush(SplatterDiscBrush.class, "svd", "splatvoxeldisc");
         brushManager.registerSniperBrush(SplineBrush.class, "sp", "spline");
-        //brushManager.registerSniperBrush(StencilBrush.class, "st", "stencil");
+        brushManager.registerSniperBrush(StencilBrush.class, "st", "stencil");
         //brushManager.registerSniperBrush(StencilListBrush.class, "sl", "stencillist");
         brushManager.registerSniperBrush(ThreePointCircleBrush.class, "tpc", "threepointcircle");
         brushManager.registerSniperBrush(TreeSnipeBrush.class, "t", "tree", "treesnipe");
