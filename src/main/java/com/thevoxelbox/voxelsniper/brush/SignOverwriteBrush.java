@@ -1,8 +1,9 @@
 package com.thevoxelbox.voxelsniper.brush;
 
-import com.thevoxelbox.voxelsniper.VoxelMessage;
 import com.thevoxelbox.voxelsniper.VoxelSniper;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
+import com.thevoxelbox.voxelsniper.voxelsniper.blockstate.IBlockState;
 import org.bukkit.ChatColor;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -84,7 +85,7 @@ public class SignOverwriteBrush extends Brush {
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
-                    BlockState blockState = this.getWorld().getBlockAt(x, y, z).getState();
+                    IBlockState blockState = this.getWorld().getBlock(x, y, z).getState();
                     if (blockState instanceof Sign) {
                         setSignText((Sign) blockState);
                         signFound = true;
@@ -290,7 +291,8 @@ public class SignOverwriteBrush extends Brush {
      * @param v
      */
     private void saveBufferToFile(final String fileName, final SnipeData v) {
-        final File store = new File(VoxelSniper.getInstance().getDataFolder() + "/" + fileName + ".vsign");
+        final File store = VoxelSniper.voxelsniper.getFileHandler().getDataFile( "/" + fileName + ".vsign");
+
         if (store.exists()) {
             v.sendMessage("This file already exists.");
             return;
@@ -324,7 +326,7 @@ public class SignOverwriteBrush extends Brush {
      * @param v
      */
     private void loadBufferFromFile(final String fileName, final String userDomain, final SnipeData v) {
-        final File store = new File(VoxelSniper.getInstance().getDataFolder() + "/" + fileName + ".vsign");
+        final File store = VoxelSniper.voxelsniper.getFileHandler().getDataFile( "/" + fileName + ".vsign");
         if (!store.exists()) {
             v.sendMessage("This file does not exist.");
             return;

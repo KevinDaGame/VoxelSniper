@@ -1,9 +1,12 @@
 package com.thevoxelbox.voxelsniper.brush;
 
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import com.thevoxelbox.voxelsniper.snipe.Undo;
-import org.bukkit.block.Block;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.MaterialFactory;
+import com.thevoxelbox.voxelsniper.voxelsniper.vector.IVector;
+import com.thevoxelbox.voxelsniper.voxelsniper.vector.VectorFactory;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 
@@ -38,7 +41,7 @@ public class DomeBrush extends Brush {
      * @param targetBlock
      */
     @SuppressWarnings("deprecation")
-    private void generateDome(final SnipeData v, final Block targetBlock) {
+    private void generateDome(final SnipeData v, final IBlock targetBlock) {
 
         if (v.getVoxelHeight() == 0) {
             v.sendMessage("VoxelHeight must not be 0.");
@@ -48,7 +51,7 @@ public class DomeBrush extends Brush {
         final int absoluteHeight = Math.abs(v.getVoxelHeight());
         final boolean negative = v.getVoxelHeight() < 0;
 
-        final Set<Vector> changeablePositions = new HashSet<>();
+        final Set<IVector> changeablePositions = new HashSet<>();
 
         final Undo undo = new Undo();
 
@@ -70,21 +73,21 @@ public class DomeBrush extends Brush {
                 final int currentBlockZAdd = NumberConversions.floor(targetBlockZ + z);
                 final int currentBlockXSubtract = NumberConversions.floor(targetBlockX - x);
                 final int currentBlockZSubtract = NumberConversions.floor(targetBlockZ - z);
-                changeablePositions.add(new Vector(currentBlockXAdd, targetY, currentBlockZAdd));
-                changeablePositions.add(new Vector(currentBlockXSubtract, targetY, currentBlockZAdd));
-                changeablePositions.add(new Vector(currentBlockXAdd, targetY, currentBlockZSubtract));
-                changeablePositions.add(new Vector(currentBlockXSubtract, targetY, currentBlockZSubtract));
+                changeablePositions.add(VectorFactory.getVector(currentBlockXAdd, targetY, currentBlockZAdd));
+                changeablePositions.add(VectorFactory.getVector(currentBlockXSubtract, targetY, currentBlockZAdd));
+                changeablePositions.add(VectorFactory.getVector(currentBlockXAdd, targetY, currentBlockZSubtract));
+                changeablePositions.add(VectorFactory.getVector(currentBlockXSubtract, targetY, currentBlockZSubtract));
 
             }
         }
 
-        for (final Vector vector : changeablePositions) {
-            final Block currentTargetBlock = vector.toLocation(this.getTargetBlock().getWorld()).getBlock();
+        for (final IVector vector : changeablePositions) {
+            final IBlock currentTargetBlock = vector.getLocation(this.getTargetBlock().getWorld()).getBlock();
             // TODO: Check whether BlockData omission affects this or not.
-            // if (currentTargetBlock.getType() != v.getVoxelMaterial() || currentTargetBlock.getBlockData().matches(v.getVoxelSubstance())) {
-            if (currentTargetBlock.getType() != v.getVoxelMaterial()) {
+            // if (currentTargetBlock.getMaterial() != v.getVoxelMaterial() || currentTargetBlock.getBlockData().matches(v.getVoxelSubstance())) {
+            if (currentTargetBlock.getMaterial() != v.getVoxelMaterial()) {
                 undo.put(currentTargetBlock);
-                currentTargetBlock.setBlockData(v.getVoxelMaterial().createBlockData(), true);
+                currentTargetBlock.setBlockData(MaterialFactory.getMaterial(v.getVoxelMaterial()).createBlockData(), true);
             }
         }
 

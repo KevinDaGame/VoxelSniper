@@ -9,9 +9,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
+import com.thevoxelbox.voxelsniper.bukkit.VoxelBrushManager;
+import com.thevoxelbox.voxelsniper.voxelsniper.IVoxelsniper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.Set;
@@ -82,7 +86,7 @@ public class BrushesTest {
     @Test
     public void testPerformerBrushesArgumentsOverloading() throws Exception {
         // Load all brushes
-        brushes = VoxelBrushManager.initialize();
+        brushes = VoxelBrushManager.initialize(Mockito.mock(IVoxelsniper.class));
 
         System.out.println(" ");
         System.out.println(" ");
@@ -115,7 +119,7 @@ public class BrushesTest {
     @Test
     public void testPerformerBrushesArgumentValuesOverloading() throws Exception {
         // Load all brushes
-        brushes = VoxelBrushManager.initialize();
+        brushes = VoxelBrushManager.initialize(Mockito.mock(IVoxelsniper.class));
         System.out.println(" ");
         System.out.println(" ");
         System.out.println(" ");

@@ -1,10 +1,14 @@
 package com.thevoxelbox.voxelsniper.brush;
 
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import com.thevoxelbox.voxelsniper.snipe.Undo;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.IMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.MaterialFactory;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.VoxelMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.vector.IVector;
+import com.thevoxelbox.voxelsniper.voxelsniper.vector.VectorFactory;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.util.Vector;
 
 /**
@@ -15,7 +19,7 @@ import org.bukkit.util.Vector;
 public class RulerBrush extends Brush {
 
     private boolean first = true;
-    private Vector coords = new Vector(0, 0, 0);
+    private IVector coords = VectorFactory.getVector();
 
     private final int xOff = 0;
     private final int yOff = 0;
@@ -30,7 +34,7 @@ public class RulerBrush extends Brush {
 
     @Override
     protected final void arrow(final SnipeData v) {
-        final Material voxelMaterial = v.getVoxelMaterial();
+        final VoxelMaterial voxelMaterial = v.getVoxelMaterial();
         this.coords = this.getTargetBlock().getLocation().toVector();
 
         if (this.xOff == 0 && this.yOff == 0 && this.zOff == 0) {
@@ -38,7 +42,7 @@ public class RulerBrush extends Brush {
             this.first = !this.first;
         } else {
             final Undo undo = new Undo();
-            setBlockMaterialAt(this.getTargetBlock().getX() + this.xOff, this.getTargetBlock().getY() + this.yOff, this.getTargetBlock().getZ() + this.zOff, voxelMaterial, undo);
+            setBlockMaterialAt(this.getTargetBlock().getX() + this.xOff, this.getTargetBlock().getY() + this.yOff, this.getTargetBlock().getZ() + this.zOff, MaterialFactory.getMaterial(voxelMaterial), undo);
             v.owner().storeUndo(undo);
         }
     }

@@ -1,9 +1,9 @@
 package com.thevoxelbox.voxelsniper.brush;
 
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import com.thevoxelbox.voxelsniper.snipe.Undo;
-import org.bukkit.Chunk;
+import com.thevoxelbox.voxelsniper.voxelsniper.chunk.IChunk;
 
 /**
  * Regenerates the target chunk.
@@ -20,7 +20,7 @@ public class RegenerateChunkBrush extends Brush {
     }
 
     private void generateChunk(final SnipeData v) {
-        final Chunk chunk = this.getTargetBlock().getChunk();
+        final IChunk chunk = this.getTargetBlock().getChunk();
         final Undo undo = new Undo();
 
         for (int z = CHUNK_SIZE; z >= 0; z--) {

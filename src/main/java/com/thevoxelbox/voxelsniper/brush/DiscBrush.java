@@ -1,11 +1,12 @@
 package com.thevoxelbox.voxelsniper.brush;
 
 import com.google.common.collect.Lists;
-import com.thevoxelbox.voxelsniper.VoxelMessage;
 import com.thevoxelbox.voxelsniper.brush.perform.PerformerBrush;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
+import com.thevoxelbox.voxelsniper.voxelsniper.vector.IVector;
 import org.bukkit.ChatColor;
-import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -35,17 +36,17 @@ public class DiscBrush extends PerformerBrush {
      *
      * @param v
      */
-    private void disc(final SnipeData v, final Block targetBlock) {
+    private void disc(final SnipeData v, final IBlock targetBlock) {
         final double radiusSquared = (v.getBrushSize() + (smoothCircle ? SMOOTH_CIRCLE_VALUE : VOXEL_CIRCLE_VALUE)) * (v.getBrushSize() + (smoothCircle ? SMOOTH_CIRCLE_VALUE : VOXEL_CIRCLE_VALUE));
-        final Vector centerPoint = targetBlock.getLocation().toVector();
-        final Vector currentPoint = centerPoint.clone();
+        final IVector centerPoint = targetBlock.getLocation().toVector();
+        final IVector currentPoint = centerPoint.clone();
 
         for (int x = -v.getBrushSize(); x <= v.getBrushSize(); x++) {
             currentPoint.setX(centerPoint.getX() + x);
             for (int z = -v.getBrushSize(); z <= v.getBrushSize(); z++) {
                 currentPoint.setZ(centerPoint.getZ() + z);
                 if (centerPoint.distanceSquared(currentPoint) <= radiusSquared) {
-                    this.currentPerformer.perform(this.clampY(currentPoint.getBlockX(), currentPoint.getBlockY(), currentPoint.getBlockZ()));
+                    this.currentPerformer.perform(this.clampY(currentPoint.getBlockX(), currentPoint.getBlockX(), currentPoint.getBlockZ()));
                 }
             }
         }

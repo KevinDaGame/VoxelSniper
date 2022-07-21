@@ -1,16 +1,17 @@
 package com.thevoxelbox.voxelsniper.brush;
 
 import com.google.common.base.Objects;
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import com.thevoxelbox.voxelsniper.snipe.Undo;
 import com.thevoxelbox.voxelsniper.util.UndoDelegate;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.BlockFace;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
+import com.thevoxelbox.voxelsniper.voxelsniper.blockstate.IBlockState;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.BukkitMaterial;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.TreeType;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,12 +35,12 @@ public class TreeSnipeBrush extends Brush {
     }
 
     @SuppressWarnings("deprecation")
-    private void single(final SnipeData v, Block targetBlock) {
+    private void single(final SnipeData v,  IBlock targetBlock) {
         UndoDelegate undoDelegate = new UndoDelegate(targetBlock.getWorld());
-        Block blockBelow = targetBlock.getRelative(BlockFace.DOWN);
-        BlockState currentState = blockBelow.getState();
+         IBlock  blockBelow = targetBlock.getRelative(BlockFace.DOWN);
+        IBlockState currentState = blockBelow.getState();
         undoDelegate.setBlock(blockBelow);
-        blockBelow.setType(Material.GRASS);
+        blockBelow.setMaterial(new BukkitMaterial(Material.GRASS));
         this.getWorld().generateTree(targetBlock.getLocation(), this.treeType, undoDelegate);
         Undo undo = undoDelegate.getUndo();
         blockBelow.setBlockData(currentState.getBlockData().getMaterial().createBlockData(), true);
@@ -50,7 +51,7 @@ public class TreeSnipeBrush extends Brush {
     private int getYOffset() {
         // getMaxHeight() is the same as getTargetBlock().getWorld().getMaxHeight()
         for (int i = 1; i < (getMaxHeight() - 1 - getTargetBlock().getY()); i++) {
-            if (Objects.equal(getTargetBlock().getRelative(0, i + 1, 0).getType(), Material.AIR)) {
+            if (Objects.equal(getTargetBlock().getRelative(0, i + 1, 0).getMaterial(), new BukkitMaterial( Material.AIR))) {
                 return i;
             }
         }
@@ -75,7 +76,7 @@ public class TreeSnipeBrush extends Brush {
 
     @Override
     protected final void arrow(final SnipeData v) {
-        Block targetBlock = getTargetBlock().getRelative(0, getYOffset(), 0);
+         IBlock  targetBlock = getTargetBlock().getRelative(0, getYOffset(), 0);
         this.single(v, targetBlock);
     }
 

@@ -1,14 +1,18 @@
 package com.thevoxelbox.voxelsniper.brush;
 
 import com.google.common.base.Objects;
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import com.thevoxelbox.voxelsniper.snipe.Undo;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
+import com.thevoxelbox.voxelsniper.voxelsniper.blockdata.IBlockData;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.BukkitMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.IMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.vector.IVector;
+import com.thevoxelbox.voxelsniper.voxelsniper.vector.VectorFactory;
+import com.thevoxelbox.voxelsniper.voxelsniper.world.IWorld;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.util.Vector;
 
 import java.util.*;
@@ -22,7 +26,7 @@ import java.util.stream.Collectors;
  */
 public class ErodeBrush extends Brush {
 
-    private static final Vector[] FACES_TO_CHECK = {new Vector(0, 0, 1), new Vector(0, 0, -1), new Vector(0, 1, 0), new Vector(0, -1, 0), new Vector(1, 0, 0), new Vector(-1, 0, 0)};
+    private static final IVector[] FACES_TO_CHECK = {VectorFactory.getVector(0, 0, 1), VectorFactory.getVector(0, 0, -1), VectorFactory.getVector(0, 1, 0), VectorFactory.getVector(0, -1, 0), VectorFactory.getVector(1, 0, 0), VectorFactory.getVector(-1, 0, 0)};
     private String presetName = "NONE";
     private ErosionPreset currentPreset = new ErosionPreset(0, 1, 0, 1);
 
@@ -47,7 +51,7 @@ public class ErodeBrush extends Brush {
     private void erosion(final SnipeData v, final ErosionPreset erosionPreset) {
         final BlockChangeTracker blockChangeTracker = new BlockChangeTracker(this.getTargetBlock().getWorld());
 
-        final Vector targetBlockVector = this.getTargetBlock().getLocation().toVector();
+        final IVector targetBlockVector = this.getTargetBlock().getLocation().toVector();
 
         for (int i = 0; i < erosionPreset.getErosionRecursion(); ++i) {
             erosionIteration(v, erosionPreset, blockChangeTracker, targetBlockVector);
@@ -66,31 +70,31 @@ public class ErodeBrush extends Brush {
         v.owner().storeUndo(undo);
     }
 
-    private void erosionIteration(final SnipeData v, final ErosionPreset erosionPreset, final BlockChangeTracker blockChangeTracker, final Vector targetBlockVector) {
+    private void erosionIteration(final SnipeData v, final ErosionPreset erosionPreset, final BlockChangeTracker blockChangeTracker, final IVector targetBlockVector) {
         final int currentIteration = blockChangeTracker.nextIteration();
         for (int x = this.getTargetBlock().getX() - v.getBrushSize(); x <= this.getTargetBlock().getX() + v.getBrushSize(); ++x) {
             for (int z = this.getTargetBlock().getZ() - v.getBrushSize(); z <= this.getTargetBlock().getZ() + v.getBrushSize(); ++z) {
                 for (int y = this.getTargetBlock().getY() - v.getBrushSize(); y <= this.getTargetBlock().getY() + v.getBrushSize(); ++y) {
-                    final Vector currentPosition = new Vector(x, y, z);
+                    final IVector currentPosition = VectorFactory.getVector(x, y, z);
                     if (currentPosition.isInSphere(targetBlockVector, v.getBrushSize())) {
                         final BlockWrapper currentBlock = blockChangeTracker.get(currentPosition, currentIteration);
 
-                        if (currentBlock.isEmpty() || currentBlock.isLiquid()) {
+                        if (currentBlock.isEmpty() || currentBlock.getBlock().isLiquid()) {
                             continue;
                         }
 
                         int count = 0;
-                        for (final Vector vector : ErodeBrush.FACES_TO_CHECK) {
-                            final Vector relativePosition = currentPosition.clone().add(vector);
+                        for (final IVector vector : ErodeBrush.FACES_TO_CHECK) {
+                            final IVector relativePosition = currentPosition.clone().add(vector);
                             final BlockWrapper relativeBlock = blockChangeTracker.get(relativePosition, currentIteration);
 
-                            if (relativeBlock.isEmpty() || relativeBlock.isLiquid()) {
+                            if (relativeBlock.isEmpty() || relativeBlock.getBlock().isLiquid()) {
                                 count++;
                             }
                         }
 
                         if (count >= erosionPreset.getErosionFaces()) {
-                            blockChangeTracker.put(currentPosition, new BlockWrapper(currentBlock.getBlock(), Material.AIR), currentIteration);
+                            blockChangeTracker.put(currentPosition, new BlockWrapper(currentBlock.getBlock(), new BukkitMaterial( Material.AIR)), currentIteration);
                         }
                     }
                 }
@@ -98,16 +102,16 @@ public class ErodeBrush extends Brush {
         }
     }
 
-    private void fillIteration(final SnipeData v, final ErosionPreset erosionPreset, final BlockChangeTracker blockChangeTracker, final Vector targetBlockVector) {
+    private void fillIteration(final SnipeData v, final ErosionPreset erosionPreset, final BlockChangeTracker blockChangeTracker, final IVector targetBlockVector) {
         final int currentIteration = blockChangeTracker.nextIteration();
         for (int x = this.getTargetBlock().getX() - v.getBrushSize(); x <= this.getTargetBlock().getX() + v.getBrushSize(); ++x) {
             for (int z = this.getTargetBlock().getZ() - v.getBrushSize(); z <= this.getTargetBlock().getZ() + v.getBrushSize(); ++z) {
                 for (int y = this.getTargetBlock().getY() - v.getBrushSize(); y <= this.getTargetBlock().getY() + v.getBrushSize(); ++y) {
-                    final Vector currentPosition = new Vector(x, y, z);
+                    final IVector currentPosition = VectorFactory.getVector(x, y, z);
                     if (currentPosition.isInSphere(targetBlockVector, v.getBrushSize())) {
                         final BlockWrapper currentBlock = blockChangeTracker.get(currentPosition, currentIteration);
 
-                        if (!(currentBlock.isEmpty() || currentBlock.isLiquid())) {
+                        if (!(currentBlock.isEmpty() || currentBlock.getBlock().isLiquid())) {
                             continue;
                         }
 
@@ -115,11 +119,11 @@ public class ErodeBrush extends Brush {
 
                         final Map<BlockWrapper, Integer> blockCount = new HashMap<>();
 
-                        for (final Vector vector : ErodeBrush.FACES_TO_CHECK) {
-                            final Vector relativePosition = currentPosition.clone().add(vector);
+                        for (final IVector vector : ErodeBrush.FACES_TO_CHECK) {
+                            final IVector relativePosition = currentPosition.clone().add(vector);
                             final BlockWrapper relativeBlock = blockChangeTracker.get(relativePosition, currentIteration);
 
-                            if (!(relativeBlock.isEmpty() || relativeBlock.isLiquid())) {
+                            if (!(relativeBlock.isEmpty() || relativeBlock.getBlock().isLiquid())) {
                                 count++;
                                 final BlockWrapper typeBlock = new BlockWrapper(null, relativeBlock.getMaterial());
                                 if (blockCount.containsKey(typeBlock)) {
@@ -130,7 +134,7 @@ public class ErodeBrush extends Brush {
                             }
                         }
 
-                        BlockWrapper currentMaterial = new BlockWrapper(null, Material.AIR);
+                        BlockWrapper currentMaterial = new BlockWrapper(null, new BukkitMaterial( Material.AIR));
                         int amount = 0;
 
                         for (final BlockWrapper wrapper : blockCount.keySet()) {
@@ -230,18 +234,18 @@ public class ErodeBrush extends Brush {
      */
     private static final class BlockChangeTracker {
 
-        private final Map<Integer, Map<Vector, BlockWrapper>> blockChanges;
-        private final Map<Vector, BlockWrapper> flatChanges;
-        private final World world;
+        private final Map<Integer, Map<IVector, BlockWrapper>> blockChanges;
+        private final Map<IVector, BlockWrapper> flatChanges;
+        private final IWorld world;
         private int nextIterationId = 0;
 
-        public BlockChangeTracker(final World world) {
+        public BlockChangeTracker(final IWorld world) {
             this.blockChanges = new HashMap<>();
             this.flatChanges = new HashMap<>();
             this.world = world;
         }
 
-        public BlockWrapper get(final Vector position, final int iteration) {
+        public BlockWrapper get(final IVector position, final int iteration) {
             BlockWrapper changedBlock = null;
 
             for (int i = iteration - 1; i >= 0; --i) {
@@ -251,7 +255,7 @@ public class ErodeBrush extends Brush {
                 }
             }
 
-            changedBlock = new BlockWrapper(position.toLocation(this.world).getBlock());
+            changedBlock = new BlockWrapper(position.getLocation(this.world).getBlock());
 
             return changedBlock;
         }
@@ -264,7 +268,7 @@ public class ErodeBrush extends Brush {
             return this.nextIterationId++;
         }
 
-        public void put(final Vector position, final BlockWrapper changedBlock, final int iteration) {
+        public void put(final IVector position, final BlockWrapper changedBlock, final int iteration) {
             if (!this.blockChanges.containsKey(iteration)) {
                 this.blockChanges.put(iteration, new HashMap<>());
             }
@@ -279,16 +283,16 @@ public class ErodeBrush extends Brush {
      */
     private static final class BlockWrapper {
 
-        private final Block block;
-        private final BlockData blockData;
+        private final IBlock block;
+        private final IBlockData blockData;
 
         @SuppressWarnings("deprecation")
-        public BlockWrapper(final Block block) {
+        public BlockWrapper(final IBlock block) {
             this.block = block;
             this.blockData = block.getBlockData();
         }
 
-        public BlockWrapper(final Block block, final Material material) {
+        public BlockWrapper(final IBlock block, final IMaterial material) {
             this.block = block;
             this.blockData = material.createBlockData();
         }
@@ -296,21 +300,21 @@ public class ErodeBrush extends Brush {
         /**
          * @return the block
          */
-        public Block getBlock() {
+        public IBlock getBlock() {
             return this.block;
         }
 
         /**
          * @return the data
          */
-        public BlockData getBlockData() {
+        public IBlockData getBlockData() {
             return this.blockData;
         }
 
         /**
          * @return the material
          */
-        public Material getMaterial() {
+        public IMaterial getMaterial() {
             return this.blockData.getMaterial();
         }
 
@@ -318,20 +322,7 @@ public class ErodeBrush extends Brush {
          * @return if the block is Empty.
          */
         public boolean isEmpty() {
-            return this.getMaterial() == Material.AIR;
-        }
-
-        /**
-         * @return if the block is a Liquid.
-         */
-        public boolean isLiquid() {
-            switch (this.getMaterial()) {
-                case WATER:
-                case LAVA:
-                    return true;
-                default:
-                    return false;
-            }
+            return this.getMaterial() == new BukkitMaterial( Material.AIR);
         }
 
     }

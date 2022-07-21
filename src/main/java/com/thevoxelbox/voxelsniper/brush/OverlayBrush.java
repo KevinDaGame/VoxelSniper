@@ -1,14 +1,18 @@
 package com.thevoxelbox.voxelsniper.brush;
 
 import com.google.common.collect.Lists;
-import com.thevoxelbox.voxelsniper.VoxelMessage;
 import com.thevoxelbox.voxelsniper.brush.perform.PerformerBrush;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import com.thevoxelbox.voxelsniper.util.VoxelList;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.BukkitMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.IMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.VoxelMaterial;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,16 +41,16 @@ public class OverlayBrush extends PerformerBrush {
             for (int x = brushSize; x >= -brushSize; x--) {
                 // check if column is valid
                 // column is valid if it has no solid block right above the clicked layer
-                final Material material = this.getBlockMaterialAt(this.getTargetBlock().getX() + x, this.getTargetBlock().getY() + 1, this.getTargetBlock().getZ() + z);
+                final IMaterial material = this.getBlockMaterialAt(this.getTargetBlock().getX() + x, this.getTargetBlock().getY() + 1, this.getTargetBlock().getZ() + z);
                 if (isIgnoredBlock(material)) {
                     if ((Math.pow(x, 2) + Math.pow(z, 2)) <= brushSizeSquared) {
                         for (int y = this.getTargetBlock().getY(); y > this.getMinHeight(); y--) {
                             // check for surface
-                            final Material layerBlock = this.getBlockMaterialAt(this.getTargetBlock().getX() + x, y, this.getTargetBlock().getZ() + z);
+                            final IMaterial layerBlock = this.getBlockMaterialAt(this.getTargetBlock().getX() + x, y, this.getTargetBlock().getZ() + z);
                             if (!isIgnoredBlock(layerBlock)) {
                                 for (int currentDepth = y; y - currentDepth < depth; currentDepth--) {
-                                    final Material currentBlock = this.getBlockMaterialAt(this.getTargetBlock().getX() + x, currentDepth, this.getTargetBlock().getZ() + z);
-                                    if (isOverrideableMaterial(v.getVoxelList(), currentBlock)) {
+                                    final IMaterial currentBlock = this.getBlockMaterialAt(this.getTargetBlock().getX() + x, currentDepth, this.getTargetBlock().getZ() + z);
+                                    if (isOverrideableMaterial(v.getVoxelList(), currentBlock.getVoxelMaterial())) {
                                         this.currentPerformer.perform(this.clampY(this.getTargetBlock().getX() + x, currentDepth, this.getTargetBlock().getZ() + z));
                                     }
                                 }
@@ -72,11 +76,11 @@ public class OverlayBrush extends PerformerBrush {
                 for (int y = this.getTargetBlock().getY(); y > this.getMinHeight() && !surfaceFound; y--) { // start scanning from the height you clicked at
                     if (memory[x + brushSize][z + brushSize] != 1) { // if haven't already found the surface in this column
                         if ((Math.pow(x, 2) + Math.pow(z, 2)) <= brushSizeSquared) { // if inside of the column...
-                            if (this.getBlockMaterialAt(this.getTargetBlock().getX() + x, y - 1, this.getTargetBlock().getZ() + z) != Material.AIR) { // if not a floating block (like one of Notch'world pools)
-                                if (this.getBlockMaterialAt(this.getTargetBlock().getX() + x, y + 1, this.getTargetBlock().getZ() + z) == Material.AIR) { // must start at surface... this prevents it filling stuff in if
+                            if (this.getBlockMaterialAt(this.getTargetBlock().getX() + x, y - 1, this.getTargetBlock().getZ() + z) != new BukkitMaterial( Material.AIR)) { // if not a floating block (like one of Notch'world pools)
+                                if (this.getBlockMaterialAt(this.getTargetBlock().getX() + x, y + 1, this.getTargetBlock().getZ() + z) == new BukkitMaterial( Material.AIR)) { // must start at surface... this prevents it filling stuff in if
                                     // you click in a wall and it starts out below surface.
-                                    final Material currentBlock = this.getBlockMaterialAt(this.getTargetBlock().getX() + x, y, this.getTargetBlock().getZ() + z);
-                                    if (this.isOverrideableMaterial(v.getVoxelList(), currentBlock)) {
+                                    final IMaterial currentBlock = this.getBlockMaterialAt(this.getTargetBlock().getX() + x, y, this.getTargetBlock().getZ() + z);
+                                    if (this.isOverrideableMaterial(v.getVoxelList(), currentBlock.getVoxelMaterial())) {
                                         for (int d = 1; (d < this.depth + 1); d++) {
                                             this.currentPerformer.perform(this.clampY(this.getTargetBlock().getX() + x, y + d, this.getTargetBlock().getZ() + z)); // fills down as many layers as you specify
                                             // in parameters
@@ -95,41 +99,19 @@ public class OverlayBrush extends PerformerBrush {
         v.owner().storeUndo(this.currentPerformer.getUndo());
     }
 
-    private boolean isIgnoredBlock(Material material) {
-        return material == Material.WATER || material.isTransparent() || material == Material.CACTUS;
+    private boolean isIgnoredBlock(IMaterial material) {
+        return material.equals(VoxelMaterial.WATER) || material.isTransparent() || material == new BukkitMaterial( Material.CACTUS);
     }
 
-    private boolean isOverrideableMaterial(VoxelList list, Material material) {
+    private boolean isOverrideableMaterial(VoxelList list, VoxelMaterial material) {
         if (this.useVoxelList) {
             return list.contains(material);
         }
 
-        if (allBlocks && !(material == Material.AIR)) {
+        if (allBlocks && !(material.equals(VoxelMaterial.AIR))) {
             return true;
         }
-
-        switch (material) {
-            case STONE:
-            case ANDESITE:
-            case DIORITE:
-            case GRANITE:
-            case GRASS_BLOCK:
-            case DIRT:
-            case COARSE_DIRT:
-            case PODZOL:
-            case SAND:
-            case RED_SAND:
-            case GRAVEL:
-            case SANDSTONE:
-            case MOSSY_COBBLESTONE:
-            case CLAY:
-            case SNOW:
-            case OBSIDIAN:
-                return true;
-
-            default:
-                return false;
-        }
+        return VoxelMaterial.OVERRIDABLE_MATERIALS.contains(material);
     }
 
     @Override

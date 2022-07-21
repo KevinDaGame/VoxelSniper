@@ -1,4 +1,4 @@
-package com.thevoxelbox.voxelsniper;
+package com.thevoxelbox.voxelsniper.bukkit;
 
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import org.bukkit.ChatColor;

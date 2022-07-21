@@ -1,9 +1,12 @@
 package com.thevoxelbox.voxelsniper.command;
 
 import com.google.common.collect.Lists;
-import com.thevoxelbox.voxelsniper.VoxelProfileManager;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelProfileManager;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import com.thevoxelbox.voxelsniper.snipe.Sniper;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.IMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.VoxelMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.player.BukkitPlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -32,7 +35,7 @@ public class VoxelVariablesCommand extends VoxelCommand {
 
     @Override
     public boolean doCommand(Player player, String[] args) {
-        Sniper sniper = VoxelProfileManager.getInstance().getSniperForPlayer(player);
+        Sniper sniper = VoxelProfileManager.getInstance().getSniperForPlayer(new BukkitPlayer(player));
         SnipeData snipeData = sniper.getSnipeData(sniper.getCurrentToolId());
 
         if (getActiveAlias().equalsIgnoreCase("vc")) {
@@ -81,19 +84,7 @@ public class VoxelVariablesCommand extends VoxelCommand {
 
             List<String> invalidMaterials = new ArrayList<>();
             for (final String string : args) {
-                boolean remove = string.contains("-");
-                Material material = Material.matchMaterial(string.toLowerCase().replace("-", ""));
-
-                if (material == null || !material.isBlock()) {
-                    invalidMaterials.add(string.replace("-", ""));
-                    continue;
-                }
-
-                if (!remove) {
-                    snipeData.getVoxelList().add(material);
-                } else {
-                    snipeData.getVoxelList().remove(material);
-                }
+                checkMaterial(string, invalidMaterials, snipeData);
             }
 
             snipeData.getVoxelMessage().voxelList();
@@ -159,19 +150,7 @@ public class VoxelVariablesCommand extends VoxelCommand {
 
                 List<String> invalidMaterials = new ArrayList<>();
                 for (final String materialString : Arrays.copyOfRange(args, 1, args.length)) {
-                    boolean remove = materialString.contains("-");
-                    Material material = Material.matchMaterial(materialString.toLowerCase().replace("-", ""));
-
-                    if (material == null || !material.isBlock()) {
-                        invalidMaterials.add(materialString.replace("-", ""));
-                        continue;
-                    }
-
-                    if (!remove) {
-                        snipeData.getVoxelList().add(material);
-                    } else {
-                        snipeData.getVoxelList().remove(material);
-                    }
+                    checkMaterial(materialString, invalidMaterials, snipeData);
                 }
 
                 snipeData.getVoxelMessage().voxelList();
@@ -185,6 +164,22 @@ public class VoxelVariablesCommand extends VoxelCommand {
         }
 
         return false;
+    }
+
+    private void checkMaterial(String string, List<String> invalidMaterials, SnipeData snipeData) {
+        boolean remove = string.contains("-");
+        VoxelMaterial material = new VoxelMaterial(string.toLowerCase().replace("-", ""));
+        //if the material is not yet defined in VoxelMaterial means that it is an item and not a block
+        if (VoxelMaterial.getMaterial(material.getKey()) == null) {
+            invalidMaterials.add(string.replace("-", ""));
+            return;
+        }
+
+        if (!remove) {
+            snipeData.getVoxelList().add(material);
+        } else {
+            snipeData.getVoxelList().remove(material);
+        }
     }
 
     @Override

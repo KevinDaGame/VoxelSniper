@@ -1,9 +1,13 @@
 package com.thevoxelbox.voxelsniper.brush;
 
 import com.google.common.collect.Lists;
-import com.thevoxelbox.voxelsniper.VoxelMessage;
 import com.thevoxelbox.voxelsniper.brush.perform.PerformerBrush;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
+import com.thevoxelbox.voxelsniper.voxelsniper.vector.BukkitVector;
+import com.thevoxelbox.voxelsniper.voxelsniper.vector.IVector;
+import com.thevoxelbox.voxelsniper.voxelsniper.vector.VectorFactory;
+import com.thevoxelbox.voxelsniper.voxelsniper.world.BukkitWorld;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockIterator;
@@ -23,7 +27,7 @@ import java.util.Random;
  */
 public class JaggedLineBrush extends PerformerBrush {
 
-    private static final Vector HALF_BLOCK_OFFSET = new Vector(0.5, 0.5, 0.5);
+    private static final IVector HALF_BLOCK_OFFSET = VectorFactory.getVector(0.5, 0.5, 0.5);
     private static final int timesUsed = 0;
 
     private static final int RECURSION_MIN = 1;
@@ -32,8 +36,8 @@ public class JaggedLineBrush extends PerformerBrush {
     private static final int SPREAD_DEFAULT = 3;
 
     private final Random random = new Random();
-    private Vector originCoords = null;
-    private Vector targetCoords = new Vector();
+    private IVector originCoords = null;
+    private IVector targetCoords = VectorFactory.getVector();
     private int recursion = RECURSION_DEFAULT;
     private int spread = SPREAD_DEFAULT;
 
@@ -45,16 +49,16 @@ public class JaggedLineBrush extends PerformerBrush {
     }
 
     private void jaggedP(final SnipeData v) {
-        final Vector originClone = this.originCoords.clone().add(JaggedLineBrush.HALF_BLOCK_OFFSET);
-        final Vector targetClone = this.targetCoords.clone().add(JaggedLineBrush.HALF_BLOCK_OFFSET);
+        final IVector originClone = this.originCoords.clone().add(JaggedLineBrush.HALF_BLOCK_OFFSET);
+        final IVector targetClone = this.targetCoords.clone().add(JaggedLineBrush.HALF_BLOCK_OFFSET);
 
-        final Vector direction = targetClone.clone().subtract(originClone);
+        final IVector direction = targetClone.clone().subtract(originClone);
         final double length = this.targetCoords.distance(this.originCoords);
 
         if (length == 0) {
-            this.currentPerformer.perform(this.targetCoords.toLocation(this.getWorld()).getBlock());
+            this.currentPerformer.perform(this.targetCoords.getLocation(this.getWorld()).getBlock());
         } else {
-            for (final BlockIterator iterator = new BlockIterator(this.getWorld(), originClone, direction, 0, NumberConversions.round(length)); iterator.hasNext();) {
+            for (final BlockIterator iterator = new BlockIterator(((BukkitWorld)this.getWorld()).getWorld(), ((BukkitVector)originClone).getVector(), ((BukkitVector)direction).getVector(), 0, NumberConversions.round(length)); iterator.hasNext();) {
                 final Block block = iterator.next();
                 for (int i = 0; i < recursion; i++) {
                     this.currentPerformer.perform(this.clampY(Math.round(block.getX() + this.random.nextInt(spread * 2) - spread), Math.round(block.getY() + this.random.nextInt(spread * 2) - spread), Math.round(block.getZ() + this.random.nextInt(spread * 2) - spread)));
@@ -68,7 +72,7 @@ public class JaggedLineBrush extends PerformerBrush {
     @Override
     public final void arrow(final SnipeData v) {
         if (originCoords == null) {
-            originCoords = new Vector();
+            originCoords = VectorFactory.getVector();
         }
         this.originCoords = this.getTargetBlock().getLocation().toVector();
         v.sendMessage(ChatColor.DARK_PURPLE + "First point selected.");

@@ -1,11 +1,11 @@
 package com.thevoxelbox.voxelsniper.brush;
 
 import com.google.common.collect.Lists;
-import com.thevoxelbox.voxelsniper.VoxelMessage;
 import com.thevoxelbox.voxelsniper.brush.perform.PerformerBrush;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
 import org.bukkit.ChatColor;
-import org.bukkit.block.Block;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ public class EllipsoidBrush extends PerformerBrush {
         this.setName("Ellipsoid");
     }
 
-    private void execute(final SnipeData v, Block targetBlock) {
+    private void execute(final SnipeData v, IBlock targetBlock) {
         this.currentPerformer.perform(targetBlock);
         double istrueoffset = istrue ? 0.5 : 0;
         int blockPositionX = targetBlock.getX();

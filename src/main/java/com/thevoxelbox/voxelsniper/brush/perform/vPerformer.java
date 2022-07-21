@@ -4,10 +4,11 @@
  */
 package com.thevoxelbox.voxelsniper.brush.perform;
 
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.Undo;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
+import com.thevoxelbox.voxelsniper.voxelsniper.world.IWorld;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 
 /**
  * @author Voxel
@@ -16,7 +17,7 @@ public abstract class vPerformer {
 
     public String name = "Performer";
     protected Undo h;
-    protected World w;
+    protected IWorld w;
 
     public abstract void info(VoxelMessage vm);
 
@@ -26,7 +27,7 @@ public abstract class vPerformer {
         h = new Undo();
     }
 
-    public abstract void perform(Block b);
+    public abstract void perform(IBlock b);
 
     public Undo getUndo() {
         Undo temp = h;

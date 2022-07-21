@@ -1,9 +1,13 @@
 package com.thevoxelbox.voxelsniper.command;
 
-import com.thevoxelbox.voxelsniper.VoxelProfileManager;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelProfileManager;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import com.thevoxelbox.voxelsniper.snipe.Sniper;
 import com.thevoxelbox.voxelsniper.util.BlockHelper;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
+import com.thevoxelbox.voxelsniper.voxelsniper.blockdata.IBlockData;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.MaterialFactory;
+import com.thevoxelbox.voxelsniper.voxelsniper.player.BukkitPlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -21,7 +25,8 @@ public class VoxelInkReplaceCommand extends VoxelCommand {
     }
     
     @Override
-    public boolean doCommand(Player player, String[] args) {
+    public boolean doCommand(Player bukkitPlayer, String[] args) {
+        BukkitPlayer player = new BukkitPlayer(bukkitPlayer);
         Sniper sniper = VoxelProfileManager.getInstance().getSniperForPlayer(player);
         SnipeData snipeData = sniper.getSnipeData(sniper.getCurrentToolId());
 
@@ -39,9 +44,9 @@ public class VoxelInkReplaceCommand extends VoxelCommand {
 
         // Command: /vir
         if (args.length == 0) {
-            Block selectedBlock = new BlockHelper(player, player.getWorld()).getTargetBlock();
+            IBlock selectedBlock = new BlockHelper(player, player.getWorld()).getTargetBlock();
             if (selectedBlock != null) {
-                if (selectedBlock.getType() != snipeData.getReplaceMaterial()) {
+                if (selectedBlock.getMaterial() != snipeData.getReplaceMaterial()) {
                     player.sendMessage(ChatColor.RED + "That block is not the same as your active replace material.");
                 } else {
                     snipeData.setReplaceSubstance(selectedBlock.getBlockData());
@@ -56,8 +61,8 @@ public class VoxelInkReplaceCommand extends VoxelCommand {
         // Command: /vir [data]
         if (args.length >= 1) {
             try {
-                BlockData newData = snipeData.getReplaceMaterial().createBlockData("[" + String.join(",", args) + "]");
-                BlockData activeData = snipeData.getReplaceSubstance();
+                IBlockData newData = MaterialFactory.getMaterial(snipeData.getReplaceMaterial()).createBlockData("[" + String.join(",", args) + "]");
+                IBlockData activeData = snipeData.getReplaceSubstance();
 
                 snipeData.setReplaceSubstance(activeData.merge(newData));
                 snipeData.getVoxelMessage().replaceData();
@@ -73,7 +78,7 @@ public class VoxelInkReplaceCommand extends VoxelCommand {
     @Override
     public List<String> doSuggestion(Player player, String[] args) {
         // TODO: Very hacky parsing, find a more elegant solution.
-        Sniper sniper = VoxelProfileManager.getInstance().getSniperForPlayer(player);
+        Sniper sniper = VoxelProfileManager.getInstance().getSniperForPlayer(new BukkitPlayer(player));
         SnipeData snipeData = sniper.getSnipeData(sniper.getCurrentToolId());
 
         String[] a = snipeData.getReplaceSubstance().getAsString().split("\\[");

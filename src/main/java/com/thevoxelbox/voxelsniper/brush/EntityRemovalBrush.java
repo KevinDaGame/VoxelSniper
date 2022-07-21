@@ -1,8 +1,10 @@
 package com.thevoxelbox.voxelsniper.brush;
 
 import com.google.common.collect.Lists;
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
+import com.thevoxelbox.voxelsniper.voxelsniper.chunk.IChunk;
+import com.thevoxelbox.voxelsniper.voxelsniper.entity.IEntity;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Entity;
@@ -52,7 +54,7 @@ public class EntityRemovalBrush extends Brush {
     }
 
     private void radialRemoval(SnipeData v) {
-        final Chunk targetChunk = getTargetBlock().getChunk();
+        final IChunk targetChunk = getTargetBlock().getChunk();
         int entityCount = 0;
         int chunkCount = 0;
 
@@ -63,7 +65,7 @@ public class EntityRemovalBrush extends Brush {
 
             for (int x = targetChunk.getX() - radius; x <= targetChunk.getX() + radius; x++) {
                 for (int z = targetChunk.getZ() - radius; z <= targetChunk.getZ() + radius; z++) {
-                    entityCount += removeEntities(getWorld().getChunkAt(x, z));
+                    entityCount += removeEntities(getWorld().getChunkAtLocation(x, z));
 
                     chunkCount++;
                 }
@@ -76,10 +78,10 @@ public class EntityRemovalBrush extends Brush {
         v.sendMessage(ChatColor.GREEN + "Removed " + ChatColor.RED + entityCount + ChatColor.GREEN + " entities out of " + ChatColor.BLUE + chunkCount + ChatColor.GREEN + (chunkCount == 1 ? " chunk." : " chunks."));
     }
 
-    private int removeEntities(Chunk chunk) throws PatternSyntaxException {
+    private int removeEntities(IChunk chunk) throws PatternSyntaxException {
         int entityCount = 0;
 
-        for (Entity entity : chunk.getEntities()) {
+        for (IEntity entity : chunk.getEntities()) {
             if (exclusionList.contains(entity.getType())) {
                 continue;
             }

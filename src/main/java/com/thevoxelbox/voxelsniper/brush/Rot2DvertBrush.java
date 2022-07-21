@@ -1,13 +1,14 @@
 package com.thevoxelbox.voxelsniper.brush;
 
 import com.google.common.collect.Lists;
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import com.thevoxelbox.voxelsniper.util.BlockWrapper;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
+import com.thevoxelbox.voxelsniper.voxelsniper.blockdata.IBlockData;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.BukkitMaterial;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +50,9 @@ public class Rot2DvertBrush extends Brush {
                 sy = this.getTargetBlock().getY() - this.bSize;
 
                 for (int y = 0; y < this.snap.length; y++) {
-                    final Block block = this.clampY(sx, sy, sz); // why is this not sx + x, sy + y sz + z?
+                    final IBlock block = this.clampY(sx, sy, sz); // why is this not sx + x, sy + y sz + z?
                     this.snap[x][y][z] = new BlockWrapper(block);
-                    block.setType(Material.AIR);
+                    block.setMaterial(new BukkitMaterial(Material.AIR));
                     sy++;
                 }
 
@@ -87,7 +88,7 @@ public class Rot2DvertBrush extends Brush {
                         final int yy = y - this.bSize;
 
                         final BlockWrapper block = this.snap[y][x][z];
-                        if (block.getMaterial() == Material.AIR) {
+                        if (block.getMaterial() == new BukkitMaterial( Material.AIR)) {
                             continue;
                         }
                         this.setBlockMaterialAndDataAt(this.getTargetBlock().getX() + yy, this.getTargetBlock().getY() + (int) newX, this.getTargetBlock().getZ() + (int) newZ, block.getBlockData());
@@ -109,12 +110,12 @@ public class Rot2DvertBrush extends Brush {
                         for (int y = 0; y < this.snap.length; y++) {
                             final int fy = y + this.getTargetBlock().getY() - this.bSize;
 
-                            final BlockData a = this.getBlockDataAt(fy, fx + 1, fz);
-                            final BlockData d = this.getBlockDataAt(fy, fx - 1, fz);
-                            final BlockData c = this.getBlockDataAt(fy, fx, fz + 1);
-                            final BlockData b = this.getBlockDataAt(fy, fx, fz - 1);
+                            final IBlockData a = this.getBlockDataAt(fy, fx + 1, fz);
+                            final IBlockData d = this.getBlockDataAt(fy, fx - 1, fz);
+                            final IBlockData c = this.getBlockDataAt(fy, fx, fz + 1);
+                            final IBlockData b = this.getBlockDataAt(fy, fx, fz - 1);
 
-                            BlockData winner;
+                            IBlockData winner;
 
                             if (a.getMaterial() == b.getMaterial() || a.getMaterial() == c.getMaterial() || a.getMaterial() == d.getMaterial()) { // I figure that since we are already narrowing it down to ONLY the holes left behind, it
                                 // should

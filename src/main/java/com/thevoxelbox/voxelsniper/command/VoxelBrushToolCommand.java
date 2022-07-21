@@ -1,9 +1,11 @@
 package com.thevoxelbox.voxelsniper.command;
 
 import com.google.common.collect.Lists;
-import com.thevoxelbox.voxelsniper.VoxelProfileManager;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelProfileManager;
 import com.thevoxelbox.voxelsniper.snipe.SnipeAction;
 import com.thevoxelbox.voxelsniper.snipe.Sniper;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.VoxelMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.player.BukkitPlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,7 +25,7 @@ public class VoxelBrushToolCommand extends VoxelCommand {
 
     @Override
     public boolean doCommand(Player player, String[] args) {
-        Sniper sniper = VoxelProfileManager.getInstance().getSniperForPlayer(player);
+        Sniper sniper = VoxelProfileManager.getInstance().getSniperForPlayer(new BukkitPlayer(player));
 
         // Default command
         // Command: /btool, /btool help, /btool info
@@ -51,7 +53,7 @@ public class VoxelBrushToolCommand extends VoxelCommand {
                     return false;
                 }
 
-                Material itemInHand = (player.getInventory().getItemInMainHand() != null) ? player.getInventory().getItemInMainHand().getType() : null;
+                VoxelMaterial itemInHand = (new BukkitPlayer(player).getItemInHand() != null) ? (new BukkitPlayer(player).getItemInHand()) : VoxelMaterial.AIR;
 
                 if (itemInHand == null) {
                     player.sendMessage(ChatColor.RED + "Please hold an item to assign a tool action to.");
@@ -66,7 +68,7 @@ public class VoxelBrushToolCommand extends VoxelCommand {
                 String toolLabel = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
 
                 if (sniper.setTool(toolLabel, action, itemInHand)) {
-                    player.sendMessage(ChatColor.GOLD + itemInHand.name() + " has been assigned to '" + toolLabel + "' as action " + action.name() + ".");
+                    player.sendMessage(ChatColor.GOLD + itemInHand.getKey() + " has been assigned to '" + toolLabel + "' as action " + action.name() + ".");
                 } else {
                     player.sendMessage(ChatColor.RED + "Couldn't assign action to that tool.");
                 }
@@ -80,7 +82,7 @@ public class VoxelBrushToolCommand extends VoxelCommand {
         
         // Command: /btool remove
         if (args[0].equalsIgnoreCase("remove")) {
-            Material itemInHand = (player.getInventory().getItemInMainHand() != null) ? player.getInventory().getItemInMainHand().getType() : null;
+            VoxelMaterial itemInHand = (new BukkitPlayer(player).getItemInHand() != null) ? new BukkitPlayer(player).getItemInHand() : VoxelMaterial.AIR;
 
             if (itemInHand == null) {
                 player.sendMessage(ChatColor.RED + "Please hold an item to unassign a tool action.");
@@ -93,7 +95,7 @@ public class VoxelBrushToolCommand extends VoxelCommand {
             }
 
             sniper.removeTool(sniper.getCurrentToolId(), itemInHand);
-            player.sendMessage(ChatColor.GOLD + itemInHand.name() + " has been unassigned as a tool.");
+            player.sendMessage(ChatColor.GOLD + itemInHand.getKey() + " has been unassigned as a tool.");
             return true;
         }
 

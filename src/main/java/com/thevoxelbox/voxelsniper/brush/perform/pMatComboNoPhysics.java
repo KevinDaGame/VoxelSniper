@@ -4,7 +4,12 @@
  */
 package com.thevoxelbox.voxelsniper.brush.perform;
 
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
+import com.thevoxelbox.voxelsniper.voxelsniper.blockdata.IBlockData;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.IMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.MaterialFactory;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.VoxelMaterial;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -14,8 +19,8 @@ import org.bukkit.block.data.BlockData;
  */
 public class pMatComboNoPhysics extends vPerformer {
 
-    private Material voxelMaterial;
-    private BlockData targetSubstance;
+    private VoxelMaterial voxelMaterial;
+    private IBlockData targetSubstance;
 
     public pMatComboNoPhysics() {
         name = "Mat-Combo, No Physics";
@@ -37,10 +42,10 @@ public class pMatComboNoPhysics extends vPerformer {
     }
 
     @Override
-    public void perform(Block b) {
+    public void perform(IBlock b) {
         if (b.getBlockData().matches(targetSubstance)) {
             h.put(b);
-            b.setBlockData(voxelMaterial.createBlockData(), false);
+            b.setBlockData(MaterialFactory.getMaterial(voxelMaterial).createBlockData(), false);
         }
     }
 

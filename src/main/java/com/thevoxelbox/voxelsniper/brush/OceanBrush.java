@@ -1,13 +1,16 @@
 package com.thevoxelbox.voxelsniper.brush;
 
 import com.google.common.collect.Lists;
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import com.thevoxelbox.voxelsniper.snipe.Undo;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.BukkitMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.IMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.MaterialFactory;
+import com.thevoxelbox.voxelsniper.voxelsniper.world.IWorld;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,59 +28,59 @@ public class OceanBrush extends Brush {
     private static final int WATER_LEVEL_DEFAULT = 62; // y=63 -- we are using array indices here
     private static final int WATER_LEVEL_MIN = 12;
     private static final int LOW_CUT_LEVEL = 12;
-    private static final List<Material> EXCLUDED_MATERIALS = new LinkedList<>();
+    private static final List<IMaterial> EXCLUDED_MATERIALS = new LinkedList<>();
 
     static {
-        EXCLUDED_MATERIALS.add(Material.AIR);
-        EXCLUDED_MATERIALS.add(Material.OAK_SAPLING);
-        EXCLUDED_MATERIALS.add(Material.ACACIA_SAPLING);
-        EXCLUDED_MATERIALS.add(Material.BIRCH_SAPLING);
-        EXCLUDED_MATERIALS.add(Material.DARK_OAK_SAPLING);
-        EXCLUDED_MATERIALS.add(Material.JUNGLE_SAPLING);
-        EXCLUDED_MATERIALS.add(Material.SPRUCE_SAPLING);
-        EXCLUDED_MATERIALS.add(Material.OAK_LEAVES);
-        EXCLUDED_MATERIALS.add(Material.ACACIA_LEAVES);
-        EXCLUDED_MATERIALS.add(Material.BIRCH_LEAVES);
-        EXCLUDED_MATERIALS.add(Material.DARK_OAK_LEAVES);
-        EXCLUDED_MATERIALS.add(Material.JUNGLE_LEAVES);
-        EXCLUDED_MATERIALS.add(Material.SPRUCE_LEAVES);
-        EXCLUDED_MATERIALS.add(Material.OAK_LOG);
-        EXCLUDED_MATERIALS.add(Material.ACACIA_LOG);
-        EXCLUDED_MATERIALS.add(Material.BIRCH_LOG);
-        EXCLUDED_MATERIALS.add(Material.DARK_OAK_LOG);
-        EXCLUDED_MATERIALS.add(Material.JUNGLE_LOG);
-        EXCLUDED_MATERIALS.add(Material.SPRUCE_LOG);
-        EXCLUDED_MATERIALS.add(Material.OAK_WOOD);
-        EXCLUDED_MATERIALS.add(Material.ACACIA_WOOD);
-        EXCLUDED_MATERIALS.add(Material.BIRCH_WOOD);
-        EXCLUDED_MATERIALS.add(Material.DARK_OAK_WOOD);
-        EXCLUDED_MATERIALS.add(Material.JUNGLE_WOOD);
-        EXCLUDED_MATERIALS.add(Material.SPRUCE_WOOD);
-        EXCLUDED_MATERIALS.add(Material.WATER);
-        EXCLUDED_MATERIALS.add(Material.LAVA);
-        EXCLUDED_MATERIALS.add(Material.DANDELION);
-        EXCLUDED_MATERIALS.add(Material.POPPY);
-        EXCLUDED_MATERIALS.add(Material.BLUE_ORCHID);
-        EXCLUDED_MATERIALS.add(Material.ALLIUM);
-        EXCLUDED_MATERIALS.add(Material.AZURE_BLUET);
-        EXCLUDED_MATERIALS.add(Material.RED_TULIP);
-        EXCLUDED_MATERIALS.add(Material.ORANGE_TULIP);
-        EXCLUDED_MATERIALS.add(Material.WHITE_TULIP);
-        EXCLUDED_MATERIALS.add(Material.PINK_TULIP);
-        EXCLUDED_MATERIALS.add(Material.OXEYE_DAISY);
-        EXCLUDED_MATERIALS.add(Material.RED_MUSHROOM);
-        EXCLUDED_MATERIALS.add(Material.BROWN_MUSHROOM);
-        EXCLUDED_MATERIALS.add(Material.MELON);
-        EXCLUDED_MATERIALS.add(Material.MELON_STEM);
-        EXCLUDED_MATERIALS.add(Material.PUMPKIN);
-        EXCLUDED_MATERIALS.add(Material.PUMPKIN_STEM);
-        EXCLUDED_MATERIALS.add(Material.COCOA);
-        EXCLUDED_MATERIALS.add(Material.SNOW);
-        EXCLUDED_MATERIALS.add(Material.SNOW_BLOCK);
-        EXCLUDED_MATERIALS.add(Material.ICE);
-        EXCLUDED_MATERIALS.add(Material.SUGAR_CANE);
-        EXCLUDED_MATERIALS.add(Material.TALL_GRASS);
-        EXCLUDED_MATERIALS.add(Material.SNOW);
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.AIR));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.OAK_SAPLING));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.ACACIA_SAPLING));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.BIRCH_SAPLING));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.DARK_OAK_SAPLING));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.JUNGLE_SAPLING));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.SPRUCE_SAPLING));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.OAK_LEAVES));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.ACACIA_LEAVES));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.BIRCH_LEAVES));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.DARK_OAK_LEAVES));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.JUNGLE_LEAVES));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.SPRUCE_LEAVES));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.OAK_LOG));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.ACACIA_LOG));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.BIRCH_LOG));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.DARK_OAK_LOG));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.JUNGLE_LOG));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.SPRUCE_LOG));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.OAK_WOOD));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.ACACIA_WOOD));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.BIRCH_WOOD));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.DARK_OAK_WOOD));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.JUNGLE_WOOD));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.SPRUCE_WOOD));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.WATER));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.LAVA));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.DANDELION));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.POPPY));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.BLUE_ORCHID));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.ALLIUM));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.AZURE_BLUET));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.RED_TULIP));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.ORANGE_TULIP));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.WHITE_TULIP));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.PINK_TULIP));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.OXEYE_DAISY));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.RED_MUSHROOM));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.BROWN_MUSHROOM));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.MELON));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.MELON_STEM));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.PUMPKIN));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.PUMPKIN_STEM));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.COCOA));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.SNOW));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.SNOW_BLOCK));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.ICE));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.SUGAR_CANE));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.TALL_GRASS));
+        EXCLUDED_MATERIALS.add(new BukkitMaterial(Material.SNOW));
     }
 
     private int waterLevel = WATER_LEVEL_DEFAULT;
@@ -92,7 +95,7 @@ public class OceanBrush extends Brush {
 
     private int getHeight(final int bx, final int bz) {
         for (int y = this.getWorld().getHighestBlockYAt(bx, bz); y > this.getMinHeight(); y--) {
-            final Material material = this.clampY(bx, y, bz).getType();
+            final IMaterial material = this.clampY(bx, y, bz).getMaterial();
             if (!EXCLUDED_MATERIALS.contains(material)) {
                 return y;
             }
@@ -106,7 +109,7 @@ public class OceanBrush extends Brush {
      */
     @SuppressWarnings("deprecation")
     protected final void oceanator(final SnipeData v, final Undo undo) {
-        final World world = this.getWorld();
+        final IWorld world = this.getWorld();
 
         final int minX = (int) Math.floor((this.getTargetBlock().getX() - v.getBrushSize()));
         final int minZ = (int) Math.floor((this.getTargetBlock().getZ() - v.getBrushSize()));
@@ -123,31 +126,31 @@ public class OceanBrush extends Brush {
 
                 // go down from highest Y block down to new sea floor
                 for (int y = highestY; y > newSeaFloorLevel; y--) {
-                    final Block block = world.getBlockAt(x, y, z);
-                    if (!block.getType().equals(Material.AIR)) {
+                    final IBlock block = world.getBlock(x, y, z);
+                    if (!block.getMaterial().equals(new BukkitMaterial(Material.AIR))) {
                         undo.put(block);
-                        block.setType(Material.AIR);
+                        block.setMaterial(new BukkitMaterial(Material.AIR));
                     }
                 }
 
                 // go down from water level to new sea level
                 for (int y = this.waterLevel; y > newSeaFloorLevel; y--) {
-                    final Block block = world.getBlockAt(x, y, z);
-                    if (!block.getType().equals(Material.WATER)) {
+                    final  IBlock  block = world.getBlock(x, y, z);
+                    if (!block.getMaterial().equals(new BukkitMaterial(Material.WATER))) {
                         // do not put blocks into the undo we already put into
-                        if (!block.getType().equals(Material.AIR)) {
+                        if (!block.getMaterial().equals(new BukkitMaterial(Material.AIR))) {
                             undo.put(block);
                         }
-                        block.setType(Material.WATER);
+                        block.setMaterial(new BukkitMaterial(Material.WATER));
                     }
                 }
 
                 // cover the sea floor of required
                 if (this.coverFloor && (newSeaFloorLevel < this.waterLevel)) {
-                    Block block = world.getBlockAt(x, newSeaFloorLevel, z);
-                    if (block.getType() != v.getVoxelMaterial()) {
+                     IBlock  block = world.getBlock(x, newSeaFloorLevel, z);
+                    if (block.getMaterial() != v.getVoxelMaterial()) {
                         undo.put(block);
-                        block.setBlockData(v.getVoxelMaterial().createBlockData());
+                        block.setBlockData(MaterialFactory.getMaterial(v.getVoxelMaterial()).createBlockData());
                     }
                 }
             }

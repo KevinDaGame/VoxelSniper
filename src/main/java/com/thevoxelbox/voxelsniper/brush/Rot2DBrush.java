@@ -1,13 +1,14 @@
 package com.thevoxelbox.voxelsniper.brush;
 
 import com.google.common.collect.Lists;
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
 import com.thevoxelbox.voxelsniper.util.BlockWrapper;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
+import com.thevoxelbox.voxelsniper.voxelsniper.blockdata.IBlockData;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.BukkitMaterial;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +48,9 @@ public class Rot2DBrush extends Brush {
                 sy = this.getTargetBlock().getY() - this.bSize;
                 if (xSquared + Math.pow(y - this.bSize, 2) <= brushSizeSquared) {
                     for (int z = 0; z < this.snap.length; z++) {
-                        final Block block = this.clampY(sx, sy, sz); // why is this not sx + x, sy + y sz + z?
+                        final IBlock block = this.clampY(sx, sy, sz); // why is this not sx + x, sy + y sz + z?
                         this.snap[x][z][y] = new BlockWrapper(block);
-                        block.setType(Material.AIR);
+                        block.setMaterial(new BukkitMaterial(Material.AIR));
                         sy++;
                     }
                 }
@@ -85,7 +86,7 @@ public class Rot2DBrush extends Brush {
                         final int yy = currentY - this.bSize;
                         final BlockWrapper block = this.snap[x][currentY][y];
 
-                        if (block.getMaterial() == Material.AIR) {
+                        if (block.getMaterial() == new BukkitMaterial( Material.AIR)) {
                             continue;
                         }
                         this.setBlockMaterialAndDataAt(this.getTargetBlock().getX() + (int) newX, this.getTargetBlock().getY() + yy, this.getTargetBlock().getZ() + (int) newZ, block.getBlockData());
@@ -107,12 +108,12 @@ public class Rot2DBrush extends Brush {
                         for (int y = 0; y < this.snap.length; y++) {
                             final int fy = y + this.getTargetBlock().getY() - this.bSize;
 
-                            final BlockData a = this.getBlockDataAt(fx + 1, fy, fz);
-                            final BlockData d = this.getBlockDataAt(fx - 1, fy, fz);
-                            final BlockData c = this.getBlockDataAt(fx, fy, fz + 1);
-                            final BlockData b = this.getBlockDataAt(fx, fy, fz - 1);
+                            final IBlockData a = this.getBlockDataAt(fx + 1, fy, fz);
+                            final IBlockData d = this.getBlockDataAt(fx - 1, fy, fz);
+                            final IBlockData c = this.getBlockDataAt(fx, fy, fz + 1);
+                            final IBlockData b = this.getBlockDataAt(fx, fy, fz - 1);
 
-                            BlockData winner;
+                            IBlockData winner;
 
                             if (a.getMaterial() == b.getMaterial() || a.getMaterial() == c.getMaterial() || a.getMaterial() == d.getMaterial()) { // I figure that since we are already narrowing it down to ONLY the holes left behind, it
                                 // should

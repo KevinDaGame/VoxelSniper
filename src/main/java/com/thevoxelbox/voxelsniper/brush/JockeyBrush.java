@@ -1,12 +1,16 @@
 package com.thevoxelbox.voxelsniper.brush;
 
 import com.google.common.collect.Lists;
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
+import com.thevoxelbox.voxelsniper.voxelsniper.chunk.IChunk;
+import com.thevoxelbox.voxelsniper.voxelsniper.entity.IEntity;
+import com.thevoxelbox.voxelsniper.voxelsniper.location.BukkitLocation;
+import com.thevoxelbox.voxelsniper.voxelsniper.location.ILocation;
+import com.thevoxelbox.voxelsniper.voxelsniper.player.AbstractPlayer;
+import com.thevoxelbox.voxelsniper.voxelsniper.player.BukkitPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -24,7 +28,7 @@ public class JockeyBrush extends Brush {
 
     private static final int ENTITY_STACK_LIMIT = 50;
     private JockeyType jockeyType = JockeyType.NORMAL_ALL_ENTITIES;
-    private Entity jockeyedEntity = null;
+    private IEntity jockeyedEntity = null;
 
     private boolean playerOnly = false;
 
@@ -36,16 +40,16 @@ public class JockeyBrush extends Brush {
     }
 
     private void sitOn(final SnipeData v) {
-        final Chunk targetChunk = this.getWorld().getChunkAt(this.getTargetBlock().getLocation());
+        final IChunk targetChunk = this.getWorld().getChunkAtLocation(this.getTargetBlock().getLocation());
         final int targetChunkX = targetChunk.getX();
         final int targetChunkZ = targetChunk.getZ();
 
         double range = Double.MAX_VALUE;
-        Entity closest = null;
+        IEntity closest = null;
 
         for (int x = targetChunkX - 1; x <= targetChunkX + 1; x++) {
             for (int y = targetChunkZ - 1; y <= targetChunkZ + 1; y++) {
-                for (final Entity entity : this.getWorld().getChunkAt(x, y).getEntities()) {
+                for (final IEntity entity : this.getWorld().getChunkAtLocation(x, y).getEntities()) {
                     if (entity.getEntityId() == v.owner().getPlayer().getEntityId()) {
                         continue;
                     }
@@ -56,7 +60,7 @@ public class JockeyBrush extends Brush {
                         }
                     }
 
-                    final Location entityLocation = entity.getLocation();
+                    final ILocation entityLocation = entity.getLocation();
                     final double entityDistance = entityLocation.distance(v.owner().getPlayer().getLocation());
 
                     if (entityDistance < range) {
@@ -68,8 +72,8 @@ public class JockeyBrush extends Brush {
         }
 
         if (closest != null) {
-            final Player player = v.owner().getPlayer();
-            final PlayerTeleportEvent playerTeleportEvent = new PlayerTeleportEvent(player, player.getLocation(), closest.getLocation(), PlayerTeleportEvent.TeleportCause.PLUGIN);
+            final AbstractPlayer player = v.owner().getPlayer();
+            final PlayerTeleportEvent playerTeleportEvent = new PlayerTeleportEvent(((BukkitPlayer)player).getPlayer(), ((BukkitLocation)player.getLocation()).getLocation(), ((BukkitLocation)closest.getLocation()).getLocation(), PlayerTeleportEvent.TeleportCause.PLUGIN);
 
             Bukkit.getPluginManager().callEvent(playerTeleportEvent);
 
@@ -90,11 +94,11 @@ public class JockeyBrush extends Brush {
     private void stack(final SnipeData v) {
         final int brushSizeDoubled = v.getBrushSize() * 2;
 
-        List<Entity> nearbyEntities = v.owner().getPlayer().getNearbyEntities(brushSizeDoubled, brushSizeDoubled, brushSizeDoubled);
-        Entity lastEntity = v.owner().getPlayer();
+        List<IEntity> nearbyEntities = v.owner().getPlayer().getNearbyEntities(brushSizeDoubled, brushSizeDoubled, brushSizeDoubled);
+        IEntity lastEntity = v.owner().getPlayer();
         int stackHeight = 0;
 
-        for (Entity entity : nearbyEntities) {
+        for (IEntity entity : nearbyEntities) {
             if (!(stackHeight >= ENTITY_STACK_LIMIT)) {
                 if (jockeyType == JockeyType.STACK_ALL_ENTITIES) {
                     lastEntity.addPassenger(entity);

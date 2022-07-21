@@ -1,20 +1,21 @@
 package com.thevoxelbox.voxelsniper.snipe;
 
 import com.google.common.collect.Maps;
-import com.thevoxelbox.voxelsniper.VoxelSniper;
 import com.thevoxelbox.voxelsniper.brush.IBrush;
 import com.thevoxelbox.voxelsniper.brush.perform.IPerformerBrush;
 import com.thevoxelbox.voxelsniper.brush.perform.PerformerBrush;
 import com.thevoxelbox.voxelsniper.event.SniperMaterialChangedEvent;
 import com.thevoxelbox.voxelsniper.event.SniperReplaceMaterialChangedEvent;
 import com.thevoxelbox.voxelsniper.util.BlockHelper;
+import com.thevoxelbox.voxelsniper.voxelsniper.IVoxelsniper;
+import com.thevoxelbox.voxelsniper.voxelsniper.block.IBlock;
+import com.thevoxelbox.voxelsniper.voxelsniper.blockdata.IBlockData;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.MaterialFactory;
+import com.thevoxelbox.voxelsniper.voxelsniper.material.VoxelMaterial;
+import com.thevoxelbox.voxelsniper.voxelsniper.player.AbstractPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 
 import java.util.LinkedList;
@@ -26,27 +27,26 @@ import java.util.UUID;
  */
 public class Sniper {
 
-    private final VoxelSniper plugin;
+    private final IVoxelsniper main;
     private final UUID player;
     private boolean enabled = true;
     private final LinkedList<Undo> undoList = new LinkedList<>();
     private final Map<String, SnipeTool> tools = Maps.newHashMap();
 
-    public Sniper(VoxelSniper plugin, Player player) {
-        this.plugin = plugin;
+    public Sniper(IVoxelsniper main, AbstractPlayer player) {
+        this.main = main;
         this.player = player.getUniqueId();
         SnipeTool sniperTool = new SnipeTool(this);
-        sniperTool.assignAction(SnipeAction.ARROW, Material.ARROW);
-        sniperTool.assignAction(SnipeAction.GUNPOWDER, Material.GUNPOWDER);
+        sniperTool.assignAction(SnipeAction.ARROW, new VoxelMaterial("arrow"));
+        sniperTool.assignAction(SnipeAction.GUNPOWDER, new VoxelMaterial("gunpowder"));
         tools.put(null, sniperTool);
     }
 
     public String getCurrentToolId() {
-        //TODO this isn't quite right
-        return getToolId((getPlayer().getItemInHand() != null) ? getPlayer().getItemInHand().getType() : null);
+        return getToolId((getPlayer().getItemInHand() != null) ? getPlayer().getItemInHand() : VoxelMaterial.AIR);
     }
 
-    public String getToolId(Material itemInHand) {
+    public String getToolId(VoxelMaterial itemInHand) {
         if (itemInHand == null) {
             return null;
         }
@@ -59,8 +59,8 @@ public class Sniper {
         return null;
     }
 
-    public Player getPlayer() {
-        return Bukkit.getPlayer(player);
+    public AbstractPlayer getPlayer() {
+        return main.getPlayer(this.player);
     }
 
     /**
@@ -72,7 +72,7 @@ public class Sniper {
      * @param clickedFace  Face of that targeted Block
      * @return true if command visibly processed, false otherwise.
      */
-    public boolean snipe(Action action, Material itemInHand, Block clickedBlock, BlockFace clickedFace) {
+    public boolean snipe(Action action, VoxelMaterial itemInHand, IBlock clickedBlock, BlockFace clickedFace) {
         String toolId = getToolId(itemInHand);
         SnipeTool sniperTool = tools.get(toolId);
 
@@ -102,8 +102,8 @@ public class Sniper {
 
         SnipeData snipeData = sniperTool.getSnipeData();
         SnipeAction snipeAction = sniperTool.getActionAssigned(itemInHand);
-        Block targetBlock;
-        Block lastBlock = null;
+        IBlock targetBlock;
+        IBlock lastBlock = null;
 
         if (clickedBlock != null) {
             targetBlock = clickedBlock;
@@ -117,7 +117,7 @@ public class Sniper {
             switch (action) {
                 case LEFT_CLICK_AIR:
                 case LEFT_CLICK_BLOCK:
-                    BlockData oldSubstance, newSubstance;
+                    IBlockData oldSubstance, newSubstance;
                     switch (snipeAction) {
                         case GUNPOWDER:
                             oldSubstance = snipeData.getReplaceSubstance();
@@ -183,7 +183,7 @@ public class Sniper {
         return tools.get(toolId).previousBrush();
     }
 
-    public boolean setTool(String toolId, SnipeAction action, Material itemInHand) {
+    public boolean setTool(String toolId, SnipeAction action, VoxelMaterial itemInHand) {
         for (Map.Entry<String, SnipeTool> entry : tools.entrySet()) {
             if (entry.getKey() != toolId && entry.getValue().hasToolAssigned(itemInHand)) {
                 return false;
@@ -198,7 +198,7 @@ public class Sniper {
         return true;
     }
 
-    public void removeTool(String toolId, Material itemInHand) {
+    public void removeTool(String toolId, VoxelMaterial itemInHand) {
         if (!tools.containsKey(toolId)) {
             SnipeTool tool = new SnipeTool(this);
             tools.put(toolId, tool);
@@ -222,11 +222,11 @@ public class Sniper {
     }
 
     public void storeUndo(Undo undo) {
-        if (VoxelSniper.getInstance().getVoxelSniperConfiguration().getUndoCacheSize() <= 0) {
+        if (main.getVoxelSniperConfiguration().getUndoCacheSize() <= 0) {
             return;
         }
         if (undo != null && undo.getSize() > 0) {
-            while (undoList.size() >= plugin.getVoxelSniperConfiguration().getUndoCacheSize()) {
+            while (undoList.size() >= main.getVoxelSniperConfiguration().getUndoCacheSize()) {
                 this.undoList.pollLast();
             }
             undoList.push(undo);
@@ -261,7 +261,7 @@ public class Sniper {
         SnipeTool backup = tools.remove(toolId);
         SnipeTool newTool = new SnipeTool(this);
 
-        for (Map.Entry<SnipeAction, Material> entry : backup.getActionTools().entrySet()) {
+        for (Map.Entry<SnipeAction, VoxelMaterial> entry : backup.getActionTools().entrySet()) {
             newTool.assignAction(entry.getKey(), entry.getValue());
         }
         tools.put(toolId, newTool);

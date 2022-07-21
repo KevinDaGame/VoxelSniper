@@ -1,7 +1,10 @@
 package com.thevoxelbox.voxelsniper.brush;
 
-import com.thevoxelbox.voxelsniper.VoxelMessage;
+import com.thevoxelbox.voxelsniper.bukkit.VoxelMessage;
 import com.thevoxelbox.voxelsniper.snipe.SnipeData;
+import com.thevoxelbox.voxelsniper.voxelsniper.entity.BukkitEntity;
+import com.thevoxelbox.voxelsniper.voxelsniper.entitytype.BukkitEntityType;
+import com.thevoxelbox.voxelsniper.voxelsniper.entitytype.IEntityType;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.EntityType;
 
@@ -15,7 +18,7 @@ import java.util.List;
  */
 public class EntityBrush extends Brush {
 
-    private EntityType entityType = EntityType.ZOMBIE;
+    private IEntityType entityType = new BukkitEntityType(EntityType.ZOMBIE);
 
     /**
      *
@@ -27,7 +30,7 @@ public class EntityBrush extends Brush {
     private void spawn(final SnipeData v) {
         for (int x = 0; x < v.getBrushSize(); x++) {
             try {
-                this.getWorld().spawn(this.getLastBlock().getLocation(), this.entityType.getEntityClass());
+                this.getWorld().spawn(this.getLastBlock().getLocation(), this.entityType);
             } catch (final IllegalArgumentException exception) {
                 v.sendMessage(ChatColor.RED + "Cannot spawn entity!");
             }
@@ -61,8 +64,8 @@ public class EntityBrush extends Brush {
         }
 
         try {
-            this.entityType = EntityType.valueOf(params[0]);
-            v.sendMessage(ChatColor.GOLD + "Entity type: " + ChatColor.DARK_GREEN + this.entityType.name());
+            this.entityType = new BukkitEntityType(EntityType.valueOf(params[0]));
+            v.sendMessage(ChatColor.GOLD + "Entity type: " + ChatColor.DARK_GREEN + this.entityType.getName());
         } catch (IllegalArgumentException e) {
             v.sendMessage(ChatColor.RED + "That entity type does not exist.");
         }
